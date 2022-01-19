@@ -6,7 +6,7 @@ import Card from "./shared/Card";
 
 function FeedbackForm() {
   const [text, setText] = useState("");
-  const [rating, setRating] = useState(10);
+  const [rating, setRating] = useState(0);
   const [btnDisabled, setBtnDisabled] = useState(true);
   const [message, setMessage] = useState("");
   const { addFeedback, feedbackEdit, updateFeedback } =
@@ -21,23 +21,56 @@ function FeedbackForm() {
   }, [feedbackEdit]);
 
   const handleTextChange = (e) => {
+    setText((prev) => {
+      if (e.target.value === "") {
+        setBtnDisabled(true);
+        setMessage(null);
+      } else if ((!e.target.value !== "" && text.length < 10) || rating < 1) {
+        setBtnDisabled(true);
+        setMessage("Text must be atleast 10 characters & Select Rating");
+      } else {
+        setBtnDisabled(false);
+        setMessage(null);
+      }
+      return e.target.value;
+    });
+  };
+
+  /* 
+  const handleTextChange = (e) => {
+
     if (text === "") {
       setBtnDisabled(true);
       setMessage(null);
-    } else if (!text !== "" && text.trim().length <= 10) {
+    } else if (!text !== "" && text.length < 10) {
       setBtnDisabled(true);
-      setMessage("Text must be atleast 10 characters");
+      setMessage("Text must be atleast 10 characters & Select Rating");
     } else {
       setBtnDisabled(false);
       setMessage(null);
     }
+
     setText(e.target.value);
+  };
+  
+ */
+  const handleSelect = (select) => {
+    setRating((prev) => {
+      if (select < 1) {
+        setBtnDisabled(true);
+        setMessage("Select Rating");
+      } else {
+        setBtnDisabled(false);
+        setMessage(null);
+      }
+      return select;
+    });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (text.trim().length > 10) {
+    if (text.trim().length > 10 && rating > 0) {
       const newFeedback = {
         text,
         rating,
@@ -56,7 +89,7 @@ function FeedbackForm() {
     <Card reverse={false}>
       <form onSubmit={handleSubmit}>
         <h2>How would you rate your service with us?</h2>
-        <RatingSelect select={(select) => setRating(select)} />
+        <RatingSelect select={handleSelect} />
 
         <div className="input-group">
           <input
